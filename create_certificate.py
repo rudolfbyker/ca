@@ -55,7 +55,7 @@ def main(ca, domains) -> int:
     # Create a config file for the extensions.
     print("Creating config file for extensions…")
     ext_path = Path(out_dir, 'config.ext')
-    alt_names = "\n".join([f"DNS.1 = {d}" for d in domains])
+    alt_names = "\n".join([f"DNS.{i + 1} = {d}" for i, d in enumerate(domains)])
     # TODO: maybe rotate the old file instead of overwriting?
     with ext_path.open(mode='w') as f:
         f.write(f"""\
