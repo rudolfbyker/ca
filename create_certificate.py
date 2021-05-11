@@ -14,9 +14,9 @@ import click
 @click.argument('domains', nargs=-1)
 def main(ca, domains) -> int:
     """
-    :param ca: The name of the CA you passed to `create_certificate_authority.py`.
-    :param domains: One or more domain names for which the certificate should be valid.
-        Specify the highest level domain first.
+    CA: The name of the CA you passed to `create_certificate_authority.py`.
+
+    DOMAINS: One or more domain names for which the certificate should be valid. Specify the highest level domain first.
     """
     if len(domains) < 1:
         print("No domains given. Nothing to do.")

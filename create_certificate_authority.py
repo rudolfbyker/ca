@@ -14,7 +14,7 @@ import click
 @click.argument('name')
 def main(name) -> None:
     """
-    :param name: Any name you want to give to your new CA.
+    NAME: Any name you want to give to your new CA.
     """
     # Create folder for our CA and its certificates.
     out_dir = Path('out', name)
