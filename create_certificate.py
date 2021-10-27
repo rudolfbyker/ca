@@ -17,6 +17,11 @@ def main(ca, domains) -> int:
     CA: The name of the CA you passed to `create_certificate_authority.py`.
 
     DOMAINS: One or more domain names for which the certificate should be valid. Specify the highest level domain first.
+
+    Example:
+        ./create_certificate.py jet jet.galaxy "*.jet.galaxy"
+
+    Note that wildcard DNS names must be quoted to prevent your shell from treating it as a filename glob.
     """
     if len(domains) < 1:
         print("No domains given. Nothing to do.")
