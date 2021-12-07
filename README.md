@@ -48,3 +48,7 @@ tls:
       - {{the domain you want secure, it has to be one of the dns entries in the cert}}
     secretName: {{name}}
 ```
+
+### Using your CA with cert-manager in Kubernetes
+
+See https://cert-manager.io/docs/configuration/ca/
