@@ -12,7 +12,7 @@ import click
 
 @click.command()
 @click.argument("name")
-def main(name) -> None:
+def main(name) -> int:
     """
     NAME: Any name you want to give to your new CA.
     """
@@ -34,6 +34,8 @@ def main(name) -> None:
     command = f"openssl req -x509 -new -nodes -key '{ca_key_path}' -sha256 -days 360 -out '{ca_root_path}'"
     Popen(command, shell=True).wait()
 
+    return 0
+
 
 if __name__ == "__main__":
-    main()
+    exit(main())

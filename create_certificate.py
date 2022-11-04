@@ -90,6 +90,8 @@ subjectAltName = @alt_names
     )
     Popen(command, shell=True).wait()
 
+    return 0
+
 
 if __name__ == "__main__":
     exit(main())
