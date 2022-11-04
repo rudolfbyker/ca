@@ -5,6 +5,7 @@ From https://stackoverflow.com/questions/7580508/getting-chrome-to-accept-self-s
 """
 from pathlib import Path
 from subprocess import Popen
+from typing import Tuple
 
 import click
 
@@ -12,7 +13,17 @@ import click
 @click.command()
 @click.argument("ca")
 @click.argument("domains", nargs=-1)
-def main(ca, domains) -> int:
+@click.option(
+    "--days",
+    type=int,
+    default=366,
+    help="The number of days for which the new certificate will be valid. Defaults to 366 days (just over a year).",
+)
+def main(
+    ca: str,
+    domains: Tuple[str, ...],
+    days: int,
+) -> int:
     """
     CA: The name of the CA you passed to `create_certificate_authority.py`.
 
@@ -86,7 +97,7 @@ subjectAltName = @alt_names
     # TODO: maybe rotate the old file instead of overwriting?
     command = (
         f"openssl x509 -req -in '{csr_path}' -CA '{ca_path}' -CAkey '{ca_key_path}' -CAcreateserial "
-        f"-out '{cert_path}' -days 1825 -sha256 -extfile '{ext_path}'"
+        f"-out '{cert_path}' -days {days} -sha256 -extfile '{ext_path}'"
     )
     Popen(command, shell=True).wait()
 

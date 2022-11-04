@@ -12,7 +12,16 @@ import click
 
 @click.command()
 @click.argument("name")
-def main(name) -> int:
+@click.option(
+    "--days",
+    type=int,
+    default=366,
+    help="The number of days for which the new CA will be valid. Defaults to 366 days (just over a year).",
+)
+def main(
+    name: str,
+    days: int,
+) -> int:
     """
     NAME: Any name you want to give to your new CA.
     """
@@ -31,7 +40,7 @@ def main(name) -> int:
     # Generate root certificate.
     ca_root_path = Path(out_dir, "root.pem")
     # TODO: maybe rotate the old file instead of overwriting?
-    command = f"openssl req -x509 -new -nodes -key '{ca_key_path}' -sha256 -days 360 -out '{ca_root_path}'"
+    command = f"openssl req -x509 -new -nodes -key '{ca_key_path}' -sha256 -days {days} -out '{ca_root_path}'"
     Popen(command, shell=True).wait()
 
     return 0
