@@ -34,7 +34,8 @@ Before you start:
 
 #### Globally on Ubuntu (also works on LinuxMint)
 
-Normally, the CA file ends with .pem and the certificate file ends with .crt. However, Ubuntu wants the CA file to end in .crt. Don’t get confused between these two files!
+Normally, the CA file ends with .pem and the certificate file ends with .crt. However, Ubuntu wants the CA file to end
+in .crt. Don’t get confused between these two files!
 
 1. Make a link to your CA in /usr/local/share/ca-certificates
    ```shell
@@ -61,7 +62,7 @@ See https://support.mozilla.org/en-US/kb/setting-certificate-authorities-firefox
 
 #### Nginx
 
-In your site config, e.g. at `/etc/nginx/sites-enables/mysite`, replacing `443` with your preferred port, and `tld` 
+In your site config, e.g. at `/etc/nginx/sites-enables/mysite`, replacing `443` with your preferred port, and `tld`
 with the same domain name for which you generated the certificate:
 
 ```nginx
@@ -89,7 +90,8 @@ Source: https://www.httpcs.com/en/help/certificats/tutorial/how-to-install-an-ss
 
 ##### Create the TLS secret
 
-Here `{{ .Values.crt | b64enc }}` is `helm` syntax. If you are not using helm, replace this with the base64-encoded contents of the corresponding files.  
+Here `{{ .Values.crt | b64enc }}` is `helm` syntax. If you are not using helm, replace this with the base64-encoded
+contents of the corresponding files.
 
 ```yaml
 apiVersion: v1
