@@ -48,7 +48,7 @@ in .crt. Don’t get confused between these two files!
 
 #### Globally on Windows
 
-See https://docs.microsoft.com/en-us/skype-sdk/sdn/articles/installing-the-trusted-root-certificate
+See https://www.supportyourtech.com/articles/how-to-add-certificate-to-trusted-root-windows-10-a-step-by-step-guide/
 
 #### Locally in Chrome
 
