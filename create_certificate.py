@@ -30,7 +30,7 @@ def main(
     DOMAINS: One or more domain names for which the certificate should be valid. Specify the highest level domain first.
 
     Example:
-        ./create_certificate.py jet jet.galaxy "*.jet.galaxy"
+        ./create_certificate.py my-vm my-vm.my-vpn "*.my-vm.my-vpn"
 
     Note that wildcard DNS names must be quoted to prevent your shell from treating it as a filename glob.
     """
