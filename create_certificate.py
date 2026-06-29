@@ -9,6 +9,7 @@ from subprocess import run
 from typing import Optional, Tuple
 
 import click
+from dotenv import load_dotenv
 
 
 @click.command()
@@ -135,4 +136,5 @@ subjectAltName = @alt_names
 
 
 if __name__ == "__main__":
+    load_dotenv()
     exit(main())
