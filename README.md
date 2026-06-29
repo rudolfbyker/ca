@@ -29,6 +29,9 @@ Before you start:
 ```
 
 - You will need the password of the private key of the CA.
+- Wildcard names only match one DNS label.
+  - `*.ts.net` matches `foo.ts.net`, but it does not match `foo.tail123456.ts.net`.
+  - Browsers do not accept multi-label wildcards like `*.*.ts.net`.
 
 ### Install the CA on the client
 
