@@ -5,7 +5,8 @@ Based on https://stackoverflow.com/questions/7580508/getting-chrome-to-accept-se
 """
 
 from pathlib import Path
-from subprocess import Popen
+from subprocess import run
+from typing import Optional
 
 import click
 
@@ -18,9 +19,18 @@ import click
     default=366,
     help="The number of days for which the new CA will be valid. Defaults to 366 days (just over a year).",
 )
+@click.option(
+    "--subject",
+    envvar="CERTIFICATE_AUTHORITY_SUBJECT",
+    help="The subject DN for the certificate authority. "
+    'Example: "/C=ZA/ST=Gauteng/L=Pretoria/O=Example/OU=IT/CN=mypc.example.com/emailAddress=admin@example.com." '
+    "If not given, `openssl` will prompt for each part interactively. "
+    "You can set this in `.env` to avoid having to pass it for every command.",
+)
 def main(
     name: str,
     days: int,
+    subject: Optional[str],
 ) -> int:
     """
     NAME: Any name you want to give to your new CA.
@@ -35,13 +45,30 @@ def main(
         print(f"Private key {ca_key_path} already exists.")
     else:
         print("Creating private for certificate authority…")
-        Popen(f"openssl genrsa -des3 -out '{ca_key_path}' 2048", shell=True).wait()
+        run(
+            args=["openssl", "genrsa", "-des3", "-out", str(ca_key_path), "2048"],
+            check=True,
+        )
 
     # Generate root certificate.
     ca_root_path = Path(out_dir, "root.pem")
-    # TODO: maybe rotate the old file instead of overwriting?
-    command = f"openssl req -x509 -new -nodes -key '{ca_key_path}' -sha256 -days {days} -out '{ca_root_path}'"
-    Popen(command, shell=True).wait()
+    command = [
+        "openssl",
+        "req",
+        "-x509",
+        "-new",
+        "-nodes",
+        "-key",
+        str(ca_key_path),
+        "-sha256",
+        "-days",
+        str(days),
+        "-out",
+        str(ca_root_path),
+    ]
+    if subject:
+        command.extend(["-subj", subject])
+    run(args=command, check=True)
 
     return 0
 
