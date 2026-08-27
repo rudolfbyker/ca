@@ -37,6 +37,12 @@ Before you start:
 
 #### Globally on Ubuntu (also works on LinuxMint)
 
+Some programs use the OS certificate store (e.g. `curl`, `firefox`)
+while others use an application-specific store (e.g. `chrome`, `chromium`).
+Some can be configured to use another store, and some cannot.
+
+##### Option 1: Ubuntu OS certificate store
+
 Normally, the CA file ends with .pem and the certificate file ends with .crt. However, Ubuntu wants the CA file to end
 in .crt. Don’t get confused between these two files!
 
@@ -48,6 +54,65 @@ in .crt. Don’t get confused between these two files!
    ```shell
    sudo update-ca-certificates
    ```
+
+##### Option 2: Chromium NSS certificate stores
+
+Chromium-based browsers do not use Ubuntu's CA store for locally installed roots.
+They use an NSS Shared DB instead.
+This also applies to Chromium/Electron-based desktop applications such as Codex/ChatGPT.
+Since Chromium M146, the default location is `~/.local/share/pki/nssdb`,
+but Chromium continues to use the legacy `~/.pki/nssdb` when it already exists.
+See Chromium's [Linux certificate management documentation][chromium-linux-cert-management].
+
+Flatpak applications have a separate data directory.
+Consequently, Flatpak Chrome uses its own NSS database at `~/.var/app/com.google.Chrome/data/pki/nssdb`.
+
+Install the NSS command-line tools:
+
+```shell
+sudo apt install libnss3-tools
+```
+
+Then run the following, replacing the CA path and nickname. Reusing the nickname makes certificate rotation
+idempotent; only the certificate with that exact nickname is replaced.
+
+```shell
+ca_file=/absolute/path/to/caname_ca.pem
+ca_nickname='caname CA'
+
+update_nss_ca() {
+  local nss_dir=$1
+
+  mkdir -p "$nss_dir"
+  if [ ! -f "$nss_dir/cert9.db" ]; then
+    certutil -N --empty-password -d "sql:$nss_dir"
+  fi
+
+  certutil -D -d "sql:$nss_dir" -n "$ca_nickname" 2>/dev/null || true
+  certutil -A -d "sql:$nss_dir" -n "$ca_nickname" -t 'C,,' -i "$ca_file"
+}
+
+if [ -d "$HOME/.pki/nssdb" ]; then
+  chromium_nss_dir="$HOME/.pki/nssdb"
+else
+  chromium_nss_dir="$HOME/.local/share/pki/nssdb"
+fi
+update_nss_ca "$chromium_nss_dir"
+
+if flatpak info com.google.Chrome >/dev/null 2>&1; then
+  flatpak_chrome_nss_dir="$HOME/.var/app/com.google.Chrome/data/pki/nssdb"
+  update_nss_ca "$flatpak_chrome_nss_dir"
+fi
+```
+
+Restart Chromium, Chrome, Codex, and other Chromium/Electron applications after updating the NSS databases.
+You can verify an import with:
+
+```shell
+certutil -L -d "sql:$chromium_nss_dir" -n "$ca_nickname"
+```
+
+[chromium-linux-cert-management]: https://chromium.googlesource.com/chromium/src/+/master/docs/linux/cert_management.md
 
 #### Globally on Windows
 
