@@ -16,6 +16,14 @@ from dotenv import load_dotenv
 @click.argument("ca")
 @click.argument("domains", nargs=-1)
 @click.option(
+    "--existing",
+    type=click.Choice(["renew", "replace", "error"]),
+    default="renew",
+    show_default=True,
+    help="How to handle existing files: renew reuses the key, replace recreates the key and certificate, "
+    "and error stops if any output file exists.",
+)
+@click.option(
     "--days",
     type=int,
     default=366,
@@ -30,9 +38,11 @@ from dotenv import load_dotenv
     "You can set this in `.env` to avoid having to pass it for every command.",
 )
 def main(
+    *,
     ca: str,
     domains: Tuple[str, ...],
     days: int,
+    existing: str,
     subject: Optional[str],
 ) -> int:
     """
@@ -51,6 +61,18 @@ def main(
 
     # Use the first domain name as the folder name.
     out_dir = Path("out", ca, domains[0])
+    if existing == "error":
+        existing_paths = [
+            out_dir / name
+            for name in ("private.key", "request.csr", "certificate.crt", "config.ext")
+            if (out_dir / name).exists()
+        ]
+        if existing_paths:
+            paths = ", ".join(str(path) for path in existing_paths)
+            raise click.ClickException(
+                f"Output files already exist: {paths}. Use --existing=renew to reuse the key "
+                "or --existing=replace to create a new key and certificate."
+            )
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # Check if the certificate authority files exist.
@@ -69,7 +91,7 @@ def main(
 
     # Generate private key if it does not exist yet.
     key_path = Path(out_dir, "private.key")
-    if key_path.exists():
+    if key_path.exists() and existing != "replace":
         print(f"Private key {key_path} already exists.")
     else:
         print("Creating private key for certificate…")
@@ -77,7 +99,7 @@ def main(
 
     # Create certificate-signing request if it does not exist.
     csr_path = Path(out_dir, "request.csr")
-    if csr_path.exists():
+    if csr_path.exists() and existing != "replace":
         print(f"Certificate signing request {csr_path} already exists.")
     else:
         print("Creating certificate signing request…")

@@ -33,6 +33,16 @@ Before you start:
   - `*.ts.net` matches `foo.ts.net`, but it does not match `foo.tail123456.ts.net`.
   - Browsers do not accept multi-label wildcards like `*.*.ts.net`.
 
+### Existing keys and certificates
+
+Both scripts accept `--existing=renew|replace|error`:
+
+- `renew` (default) reuses the existing private key and replaces the certificate. Existing certificate requests are reused.
+- `replace` creates a new private key and certificate, including a new certificate request when signing a certificate.
+- `error` stops with a non-zero exit code if any output file already exists, leaving the files untouched.
+
+After replacing a CA, install its new root certificate on clients and reissue certificates signed by it.
+
 ### Install the CA on the client
 
 #### Globally on Ubuntu (also works on LinuxMint)
