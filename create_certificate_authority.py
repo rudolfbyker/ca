@@ -95,6 +95,12 @@ def main(
             str(days),
             "-out",
             str(ca_root_path),
+            "-addext",
+            "basicConstraints=critical,CA:TRUE",
+            "-addext",
+            "keyUsage=critical,keyCertSign,cRLSign",
+            "-addext",
+            "subjectKeyIdentifier=hash",
         ]
         if subject:
             command.extend(["-subj", subject])
@@ -105,6 +111,7 @@ def main(
                 "openssl",
                 "verify",
                 "-check_ss_sig",
+                "-x509_strict",
                 "-CAfile",
                 str(ca_root_path),
                 str(ca_root_path),
