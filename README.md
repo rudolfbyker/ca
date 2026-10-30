@@ -215,4 +215,17 @@ spec:
 You can generate a root CA and give it to cert-manager to have certificates automatically generated for you Kubernetes
 ingresses. Then you don't need the `create_certificate.py` script.
 
+#### Prepare the CA key for cert-manager
+
+cert-manager needs `root.pem` and an unencrypted copy of the CA private key. From the repository root:
+
+```shell
+umask 077
+openssl pkey -in out/rsc/private.key -out out/rsc/cert-manager.key
+```
+
+Enter the CA key password when prompted. Use `root.pem` for the Secret's `tls.crt` and
+`cert-manager.key` for `tls.key`. Keep the original encrypted `private.key` for storage.
+Delete `cert-manager.key` after updating the Kubernetes Secret. Do not commit or share the decrypted key.
+
 See https://cert-manager.io/docs/configuration/ca/
