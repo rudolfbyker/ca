@@ -1,3 +1,7 @@
 .idea
 out
 .env
+
+# Installer builds embed only a public certificate, supplied at build time.
+windows-installer/root.pem
+windows-installer/*.exe

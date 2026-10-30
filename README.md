@@ -229,3 +229,20 @@ Enter the CA key password when prompted. Use `root.pem` for the Secret's `tls.cr
 Delete `cert-manager.key` after updating the Kubernetes Secret. Do not commit or share the decrypted key.
 
 See https://cert-manager.io/docs/configuration/ca/
+
+### Windows installer
+
+Build a standalone installer on Linux with Go 1.22 or newer:
+
+```shell
+./build-windows-installer.sh out/my-ca/root.pem out/ca-setup.exe
+```
+
+Send only the resulting `.exe` to your colleagues.
+It contains the public certificate, never the private key.
+They double-click it, confirm installation, then restart their browsers.
+It installs for the current Windows user without administrator access or terminal commands.
+Running it again is safe, as it leaves older roots in place.
+Rebuild it whenever the root certificate changes.
+Windows may show an unknown-publisher warning for unsigned builds.
+Tell them that if they still see certificate warnings, they should contact you rather than dismissing the warnings.
