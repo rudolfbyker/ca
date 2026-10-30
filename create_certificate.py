@@ -5,11 +5,14 @@ From https://stackoverflow.com/questions/7580508/getting-chrome-to-accept-self-s
 """
 
 from pathlib import Path
+from secrets import randbits
 from subprocess import run
 from typing import Optional, Tuple
 
 import click
 from dotenv import load_dotenv
+
+from output_transaction import output_transaction
 
 
 @click.command()
@@ -46,6 +49,8 @@ def main(
     subject: Optional[str],
 ) -> int:
     """
+    Create a certificate signed by a named CA.
+
     CA: The name of the CA you passed to `create_certificate_authority.py`.
 
     DOMAINS: One or more domain names for which the certificate should be valid. Specify the highest level domain first.
@@ -89,39 +94,42 @@ def main(
         )
         return 1
 
-    # Generate private key if it does not exist yet.
-    key_path = Path(out_dir, "private.key")
-    if key_path.exists() and existing != "replace":
-        print(f"Private key {key_path} already exists.")
-    else:
-        print("Creating private key for certificate…")
-        run(args=["openssl", "genrsa", "-out", str(key_path), "2048"], check=True)
+    with output_transaction(
+        out_dir=out_dir,
+        filenames=("private.key", "request.csr", "config.ext", "certificate.crt"),
+    ) as staging:
+        # Generate private key if it does not exist yet.
+        key_path = Path(staging, "private.key")
+        if key_path.exists() and existing != "replace":
+            print(f"Private key {key_path} already exists.")
+        else:
+            print("Creating private key for certificate…")
+            run(args=["openssl", "genrsa", "-out", str(key_path), "2048"], check=True)
 
-    # Create certificate-signing request if it does not exist.
-    csr_path = Path(out_dir, "request.csr")
-    if csr_path.exists() and existing != "replace":
-        print(f"Certificate signing request {csr_path} already exists.")
-    else:
-        print("Creating certificate signing request…")
-        command = [
-            "openssl",
-            "req",
-            "-new",
-            "-key",
-            str(key_path),
-            "-out",
-            str(csr_path),
-        ]
-        if subject:
-            command.extend(["-subj", subject])
-        run(args=command, check=True)
+        # Create certificate-signing request if it does not exist.
+        csr_path = Path(staging, "request.csr")
+        if csr_path.exists() and existing != "replace":
+            print(f"Certificate signing request {csr_path} already exists.")
+        else:
+            print("Creating certificate signing request…")
+            command = [
+                "openssl",
+                "req",
+                "-new",
+                "-key",
+                str(key_path),
+                "-out",
+                str(csr_path),
+            ]
+            if subject:
+                command.extend(["-subj", subject])
+            run(args=command, check=True)
 
-    # Create a config file for the extensions.
-    print("Creating config file for extensions…")
-    ext_path = Path(out_dir, "config.ext")
-    alt_names = "\n".join([f"DNS.{i + 1} = {d}" for i, d in enumerate(domains)])
-    with ext_path.open(mode="w") as f:
-        f.write(f"""\
+        # Create a config file for the extensions.
+        print("Creating config file for extensions…")
+        ext_path = Path(staging, "config.ext")
+        alt_names = "\n".join([f"DNS.{i + 1} = {d}" for i, d in enumerate(domains)])
+        ext_path.write_text(f"""
 authorityKeyIdentifier=keyid,issuer
 basicConstraints=CA:FALSE
 keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
@@ -130,29 +138,35 @@ subjectAltName = @alt_names
 {alt_names}
 """)
 
-    # Create the signed certificate.
-    print("Creating signed certificate…")
-    cert_path = Path(out_dir, "certificate.crt")
-    command = [
-        "openssl",
-        "x509",
-        "-req",
-        "-in",
-        str(csr_path),
-        "-CA",
-        str(ca_path),
-        "-CAkey",
-        str(ca_key_path),
-        "-CAcreateserial",
-        "-out",
-        str(cert_path),
-        "-days",
-        str(days),
-        "-sha256",
-        "-extfile",
-        str(ext_path),
-    ]
-    run(args=command, check=True)
+        # Create the signed certificate.
+        print("Creating signed certificate…")
+        cert_path = Path(staging, "certificate.crt")
+        command = [
+            "openssl",
+            "x509",
+            "-req",
+            "-in",
+            str(csr_path),
+            "-CA",
+            str(ca_path),
+            "-CAkey",
+            str(ca_key_path),
+            "-set_serial",
+            str(randbits(159) or 1),
+            "-out",
+            str(cert_path),
+            "-days",
+            str(days),
+            "-sha256",
+            "-extfile",
+            str(ext_path),
+        ]
+        run(args=command, check=True)
+
+        run(
+            args=["openssl", "verify", "-CAfile", str(ca_path), str(cert_path)],
+            check=True,
+        )
 
     return 0
 
