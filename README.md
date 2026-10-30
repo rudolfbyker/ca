@@ -246,3 +246,18 @@ Running it again is safe, as it leaves older roots in place.
 Rebuild it whenever the root certificate changes.
 Windows may show an unknown-publisher warning for unsigned builds.
 Tell them that if they still see certificate warnings, they should contact you rather than dismissing the warnings.
+
+### Linux installer
+
+On Debian, Ubuntu, or Linux Mint, install `openssl`, `ca-certificates`, and `libnss3-tools`,
+then run as your normal desktop user:
+
+```shell
+./install-ca-linux.sh out/my-ca/root.pem
+```
+
+Review the displayed certificate and confirm installation.
+The script requests sudo for the OS trust store,
+then updates your Chromium NSS store and Flatpak Chrome store if installed.
+Restart your browsers afterward.
+Other users must update their own browser stores.
