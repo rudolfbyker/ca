@@ -79,6 +79,23 @@ class CertificateOutputsTest(TestCase):
             if path.is_file()
         }
 
+    def test_generated_chain_passes_strict_validation(self) -> None:
+        """
+        Accept the generated chain under strict X.509 checks used by TLS clients.
+        """
+        run(
+            args=[
+                "openssl",
+                "verify",
+                "-x509_strict",
+                "-CAfile",
+                "out/test/root.pem",
+                "out/test/host.example/certificate.crt",
+            ],
+            check=True,
+            capture_output=True,
+        )
+
     def test_generation_and_validation_failures_preserve_outputs(self) -> None:
         """
         Keep both old pairs intact after signing, validation, or cancellation fails.
