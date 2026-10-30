@@ -221,7 +221,7 @@ cert-manager needs `root.pem` and an unencrypted copy of the CA private key. Fro
 
 ```shell
 umask 077
-openssl pkey -in out/rsc/private.key -out out/rsc/cert-manager.key
+openssl pkey -in out/my-ca/private.key -out out/my-ca/cert-manager.key
 ```
 
 Enter the CA key password when prompted. Use `root.pem` for the Secret's `tls.crt` and
