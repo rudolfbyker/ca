@@ -5,3 +5,7 @@ out
 # Installer builds embed only a public certificate, supplied at build time.
 windows-installer/root.pem
 windows-installer/*.exe
+
+# Python bytecode caches.
+__pycache__/
+*.py[cod]
