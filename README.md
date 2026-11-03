@@ -47,8 +47,8 @@ After replacing a CA, install its new root certificate on clients and reissue ce
 
 #### Globally on Ubuntu (also works on LinuxMint)
 
-Some programs use the OS certificate store (e.g. `curl`, `firefox`)
-while others use an application-specific store (e.g. `chrome`, `chromium`).
+Some programs use the OS certificate store (e.g. `curl`),
+while others use an application-specific store (e.g. Firefox on Linux, Chrome, and Chromium).
 Some can be configured to use another store, and some cannot.
 
 ##### Option 1: Ubuntu OS certificate store
@@ -258,6 +258,8 @@ then run as your normal desktop user:
 
 Review the displayed certificate and confirm installation.
 The script requests sudo for the OS trust store,
-then updates your Chromium NSS store and Flatpak Chrome store if installed.
+then updates your Chromium NSS store, Flatpak Chrome store, and existing registered Firefox profiles
+(including Snap and Flatpak installations).
+Run it again after creating a new Firefox profile.
 Restart your browsers afterward.
 Other users must update their own browser stores.
